@@ -42,7 +42,9 @@ Les règles de détection (régies, libellés, pièges connus…) sont dans
 
 ## Installation
 
-1. Installer l'APK (`app-debug.apk` ou version de release).
+1. Télécharger l'APK depuis la page [Releases](https://github.com/NzoSifou/AGAS/releases) et
+   l'installer. Une version installée depuis Android Studio (signature de debug) doit d'abord
+   être désinstallée : Android refuse d'installer une appli signée par une autre clé par-dessus.
 2. Ouvrir AGAS, puis **« Ouvrir l'accessibilité »** et activer **« AGAS – Passe-pub »**.
    - Option grisée ? Android bloque l'accessibilité des applis installées hors Play Store :
      *Infos de l'appli* → menu ⋮ → **« Autoriser les paramètres restreints »**, puis réessayer.
@@ -52,7 +54,7 @@ Les règles de détection (régies, libellés, pièges connus…) sont dans
    - **Démarrage automatique** activé ;
    - dans les applis récentes, **verrouiller** AGAS (appui long → cadenas).
 
-   La carte « Fiabilité » de l'appli ouvre directement ces écrans.
+   La carte « Fiabilité » de l'onglet Accueil ouvre directement ces écrans.
 
 ## Réglages
 
@@ -72,7 +74,12 @@ Les règles de détection (régies, libellés, pièges connus…) sont dans
 ```bash
 ./gradlew assembleDebug        # APK : app/build/outputs/apk/debug/app-debug.apk
 ./gradlew testDebugUnitTest    # tests unitaires (règles, anti-détournement, croix SVG)
+./gradlew assembleRelease      # APK signé : app/build/outputs/apk/release/app-release.apk
 ```
+
+La release est signée avec la clé décrite dans `keystore.properties` à la racine du projet
+(`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). Ce fichier et la clé ne sont jamais
+commités ; sans eux, `assembleRelease` produit un APK non signé.
 
 Diagnostic sur appareil :
 
@@ -93,11 +100,11 @@ Structure du code (`app/src/main/java/fr/nzosifou/agas/`) :
 | `guard/` | `HijackGuard` : détection des détournements après un clic |
 | `rules/` | Chargement de `ad_rules.json` |
 | `data/` | Réglages, statistiques, journal, mémoire des pièges |
-| `ui/` | Interface Jetpack Compose |
+| `ui/` | Interface Jetpack Compose : `AgasApp` (onglets), `SetupScreen`, `HomeTab`, `SettingsTab`, `LogTab`, composants et thème Nocturne |
 
 ## Changelog
 
-### [1.0] — non publiée
+### [1.0.0] — 2026-09-29
 
 Première version.
 
@@ -133,6 +140,11 @@ Première version.
 
 **Interface et identité**
 
-- Interface Jetpack Compose : état du service, réglages, statistiques, journal.
+- Interface Jetpack Compose au design system sombre « Nocturne » (icônes Phosphor), en trois
+  onglets : **Accueil** (état en direct de la pub en cours, statistiques, carte « Fiabilité » à
+  cocher, activité récente), **Réglages** (regroupés par usage) et **Journal** (filtres Tout /
+  Actions / Alertes, partage).
+- Écran de première configuration tant que le service d'accessibilité n'est pas activé.
+- Messages éphémères quand une pub est passée ou qu'une fausse croix est évitée.
 - Logo « Avance rapide auto » : icône adaptative (fond et premier plan séparés), icône monochrome
   pour les icônes à thème (Android 13+), icône de notification, écran de démarrage.

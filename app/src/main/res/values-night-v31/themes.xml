@@ -1,5 +1,0 @@
-<resources>
-    <style name="Theme.AGAS" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowSplashScreenBackground">@color/agas_background_bottom</item>
-    </style>
-</resources>

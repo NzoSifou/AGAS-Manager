@@ -9,6 +9,7 @@ composeBom = "2026.02.01"
 activityCompose = "1.8.2"
 lifecycle = "2.9.4"
 json = "20240303"
+phosphorIcons = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -22,6 +23,8 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+# Icônes Phosphor (design system Nocturne) pour Compose.
+phosphor-icons = { group = "com.adamglin", name = "phosphor-icon", version.ref = "phosphorIcons" }
 # Implémentation JVM de org.json pour les tests unitaires (celle d'Android n'existe que sur l'appareil).
 json = { group = "org.json", name = "json", version.ref = "json" }
 

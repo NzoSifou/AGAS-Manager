@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import fr.nzosifou.agas.MainActivity
 import fr.nzosifou.agas.R
+import fr.nzosifou.agas.data.AgasEvents
 import fr.nzosifou.agas.data.AgasLog
 import fr.nzosifou.agas.data.AgasSettings
 import fr.nzosifou.agas.data.TrapMemory
@@ -59,7 +60,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class AdSkipperService : AccessibilityService() {
 
     /** Suivi d'une pub, de son apparition jusqu'au retour dans le jeu. */
-    private class AdSession(val gamePackage: String, var adActivity: String, val startedAt: Long) {
+    private class AdSession(
+        val gamePackage: String,
+        var adActivity: String,
+        val startedAt: Long,
+        /** Régie affichée dans l'appli (« Unity », « AppLovin »…). */
+        val network: String,
+    ) {
         /** Fenêtres d'accessibilité des Activity de pub (une pub peut en enchaîner plusieurs). */
         val adWindowIds = HashSet<Int>()
         /** Si l'événement n'a pas d'identifiant de fenêtre, on prend la plus haute jusqu'à cet instant. */
@@ -215,7 +222,15 @@ class AdSkipperService : AccessibilityService() {
         super.onDestroy()
     }
 
+    private val clearAdStatus = Runnable { AgasEvents.setAdStatus(null) }
+
+    /** Étape affichée sur l'écran d'accueil pendant la pub en cours. */
+    private fun showPhase(s: AdSession, phase: AgasEvents.Phase) {
+        if (AgasEvents.adStatus.value?.phase != phase) AgasEvents.setAdStatus(AgasEvents.AdStatus(s.network, phase))
+    }
+
     private fun stop() {
+        AgasEvents.setAdStatus(null)
         runCatching { stopForeground(STOP_FOREGROUND_REMOVE) }
         runCatching { unregisterReceiver(debugDumpReceiver) }
         handler.removeCallbacksAndMessages(null)
@@ -246,7 +261,11 @@ class AdSkipperService : AccessibilityService() {
             val s = if (current == null || current.gamePackage != pkg) {
                 if (current != null) endSession()
                 AgasLog.i("Pub détectée dans ${appLabel(pkg)} (${cls.substringAfterLast('.')})")
-                AdSession(pkg, cls, now()).also { session = it }
+                AdSession(pkg, cls, now(), rules.networkName(cls)).also {
+                    session = it
+                    handler.removeCallbacks(clearAdStatus)
+                    AgasEvents.setAdStatus(AgasEvents.AdStatus(it.network, AgasEvents.Phase.SEARCHING))
+                }
             } else {
                 current.also { it.adActivity = cls }
             }
@@ -306,6 +325,7 @@ class AdSkipperService : AccessibilityService() {
         if (!values.enabled) {
             AgasLog.i("AGAS désactivé : suivi de la pub arrêté")
             session = null
+            AgasEvents.setAdStatus(null)
             return
         }
         val now = now()
@@ -314,6 +334,7 @@ class AdSkipperService : AccessibilityService() {
         if (now - maxOf(s.startedAt, s.lastAdVisibleAt) > SESSION_TIMEOUT_MS) {
             AgasLog.w("Pub hors écran depuis plus de 5 min : abandon")
             session = null
+            AgasEvents.setAdStatus(null)
             return
         }
 
@@ -362,6 +383,8 @@ class AdSkipperService : AccessibilityService() {
             w.root?.also { it.refresh() }?.let { ScanWindow(it, Rect().also(w::getBoundsInScreen)) }
         }
         val ignored = s.cooldowns.filterValues { it > now }.keys
+        // Après un appui, « Bouton trouvé, appui… » reste affiché un instant, puis retour à la recherche.
+        if (now - s.lastClickAt > CLICK_PHASE_MS) showPhase(s, AgasEvents.Phase.SEARCHING)
         val adAge = now - s.startedAt
         val isTrap = { key: String ->
             traps.isTrap(s.adActivity, key, adAge) ||
@@ -441,6 +464,7 @@ class AdSkipperService : AccessibilityService() {
         s.lastClickedTrapKey = null
         s.nextActionAt = now + AFTER_CLICK_DELAY_MS
         settings.recordClick()
+        showPhase(s, AgasEvents.Phase.CLICKING)
         AgasLog.action("$how sur le ${c.reason} : seule sortie du mini-jeu, la boutique sera refermée")
         if (values.hijackGuard) {
             guard.arm(s.gamePackage, s.adActivity, c.center)
@@ -495,6 +519,7 @@ class AdSkipperService : AccessibilityService() {
         s.lastClickedTrapKey = c.trapKey
         s.nextActionAt = now() + AFTER_CLICK_DELAY_MS
         settings.recordClick()
+        showPhase(s, AgasEvents.Phase.CLICKING)
         AgasLog.action("$how sur ${c.reason} (essai $attempt, score ${c.score})")
         if (values.hijackGuard) {
             guard.arm(s.gamePackage, s.adActivity, c.center)
@@ -597,10 +622,15 @@ class AdSkipperService : AccessibilityService() {
             closedByUs -> {
                 settings.recordAdSkipped()
                 AgasLog.i("Pub fermée par AGAS après $seconds s (${s.clicks} clic(s))")
+                AgasEvents.toast("Pub ${s.network} passée")
             }
             s.clicks > 0 -> AgasLog.w("Pub fermée sans AGAS après $seconds s (${s.clicks} clic(s) sans effet)")
             else -> AgasLog.i("Pub terminée après $seconds s sans action d'AGAS")
         }
+        // « Retour au jeu. » s'affiche un instant sur l'écran d'accueil.
+        AgasEvents.setAdStatus(AgasEvents.AdStatus(s.network, AgasEvents.Phase.RETURNING))
+        handler.removeCallbacks(clearAdStatus)
+        handler.postDelayed(clearAdStatus, RETURNING_PHASE_MS)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -665,6 +695,7 @@ class AdSkipperService : AccessibilityService() {
             s.lastClickedTrapKey?.let { key ->
                 traps.record(armed.adActivity, key)
                 AgasLog.w("Piège mémorisé pour ${armed.adActivity.substringAfterLast('.')} : « $key »")
+                AgasEvents.toast("Fausse croix évitée — piège mémorisé pour ${s.network}")
             }
         }
         ensureBackInGame(armed.gamePackage, attempt = 1)
@@ -805,6 +836,8 @@ class AdSkipperService : AccessibilityService() {
         private const val NO_TICK = -1L
         private const val FIRST_TICK_DELAY_MS = 300L
         private const val TICK_MS = 400L
+        private const val CLICK_PHASE_MS = 1_500L
+        private const val RETURNING_PHASE_MS = 1_500L
         private const val FAST_TICK_MS = 150L
         private const val WAKE_TAP_AFTER_MS = 6_000L
         private const val WAKE_TAP_INTERVAL_MS = 15_000L

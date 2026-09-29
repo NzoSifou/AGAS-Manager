@@ -1,4 +1,10 @@
 <resources>
-    <!-- Thème de la fenêtre uniquement : l'interface est entièrement en Compose (voir ui/theme). -->
-    <style name="Theme.AGAS" parent="android:Theme.Material.Light.NoActionBar" />
+    <!--
+      Thème de la fenêtre uniquement : l'interface est en Compose (design system Nocturne, sombre en
+      permanence, voir ui/theme). Le fond de fenêtre reprend la couleur de l'appli pour éviter un
+      flash blanc au démarrage.
+    -->
+    <style name="Theme.AGAS" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/agas_background_bottom</item>
+    </style>
 </resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Symbole du logo 1e en taille normale (carte principale de l'écran d'accueil, 64 dp). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:pathData="M22,28 L42,50 L22,72"
+        android:strokeWidth="10"
+        android:strokeColor="#FF5D5294"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M42,28 L62,50 L42,72"
+        android:strokeWidth="10"
+        android:strokeColor="#FF9184D9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFE7E5FE"
+        android:pathData="M71,50 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+</vector>

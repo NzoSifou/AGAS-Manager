@@ -16,6 +16,8 @@ class AdRules(
     private val adActivityExcludedPrefixes: List<String>,
     private val landingPageActivityPatterns: List<Regex>,
     private val knownEarlyTraps: Set<String>,
+    /** Préfixe de classe → nom affiché de la régie (ordre du fichier conservé). */
+    private val networkNames: List<Pair<String, String>>,
     val playableMarkerIdPatterns: List<Regex>,
     val videoMarkerIdPatterns: List<Regex>,
     val storeExitTextPatterns: List<Regex>,
@@ -34,6 +36,15 @@ class AdRules(
         adActivityPrefixes.any { className.startsWith(it) } &&
             adActivityExcludedPrefixes.none { className.startsWith(it) } &&
             !isLandingPage(className)
+
+    /**
+     * Nom affiché de la régie d'une Activity de pub (« Unity », « AppLovin »…). À défaut, le
+     * deuxième segment du nom de paquet (« com.acme.ads.X » → « Acme »).
+     */
+    fun networkName(adActivity: String): String =
+        networkNames.firstOrNull { adActivity.startsWith(it.first) }?.second
+            ?: adActivity.split('.').getOrNull(1)?.replaceFirstChar { it.uppercase() }
+            ?: adActivity
 
     /** Bouton connu pour ouvrir la boutique si on clique trop tôt (voir TrapMemory.GRACE_MS). */
     fun isKnownEarlyTrap(adActivity: String, trapKey: String) = "$adActivity|$trapKey" in knownEarlyTraps
@@ -64,6 +75,9 @@ class AdRules(
             adActivityExcludedPrefixes = o.strings("adActivityExcludedPrefixes"),
             landingPageActivityPatterns = o.regexes("landingPageActivityPatterns"),
             knownEarlyTraps = o.strings("knownEarlyTraps").toSet(),
+            networkNames = o.optJSONObject("networkNames")?.let { names ->
+                names.keys().asSequence().map { it to names.getString(it) }.toList()
+            }.orEmpty(),
             playableMarkerIdPatterns = o.regexes("playableMarkerIdPatterns"),
             videoMarkerIdPatterns = o.regexes("videoMarkerIdPatterns"),
             storeExitTextPatterns = o.regexes("storeExitTextPatterns"),

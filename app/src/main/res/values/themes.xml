@@ -1,0 +1,4 @@
+<resources>
+    <!-- Thème de la fenêtre uniquement : l'interface est entièrement en Compose (voir ui/theme). -->
+    <style name="Theme.AGAS" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

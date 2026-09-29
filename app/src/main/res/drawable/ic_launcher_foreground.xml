@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Calque de PREMIER PLAN de l'icône adaptative (logo 1e « Avance rapide auto ») : deux chevrons
+  qui avancent et le point « automatique ».
+
+  Le dessin d'origine est en unités 0–100 ; dans la maquette, il occupe 120 px d'une tuile de
+  176 px, soit la zone visible de 72 dp d'une icône adaptative. D'où l'échelle
+  72 × 120 / 176 / 100 ≈ 0,4909, centrée sur (54, 54). Le symbole reste dans la zone sûre
+  (cercle de 66 dp) : aucun masque de lanceur ne le rogne.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.4909"
+        android:scaleY="0.4909"
+        android:translateX="29.4545"
+        android:translateY="29.4545">
+        <path
+            android:pathData="M22,28 L42,50 L22,72"
+            android:strokeWidth="10"
+            android:strokeColor="#FF5D5294"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M42,28 L62,50 L42,72"
+            android:strokeWidth="10"
+            android:strokeColor="#FF9184D9"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:fillColor="#FFE7E5FE"
+            android:pathData="M71,50 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+    </group>
+</vector>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Calque de FOND de l'icône adaptative (logo 1e « Avance rapide auto »).
+  Dégradé CSS 160° de #2d3042 vers #161826 sur le canevas de 108 dp : l'axe du dégradé va du
+  haut (légèrement à gauche) vers le bas (légèrement à droite).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="30.3"
+                android:startY="-11"
+                android:endX="77.7"
+                android:endY="119"
+                android:startColor="#FF2D3042"
+                android:endColor="#FF161826" />
+        </aapt:attr>
+    </path>
+</vector>

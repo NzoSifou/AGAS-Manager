@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Calque MONOCHROME de l'icône adaptative (icônes à thème, Android 13+). Même géométrie que le
+  premier plan, d'une seule couleur : le système n'en garde que la forme et la teinte lui-même
+  selon le fond d'écran.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.4909"
+        android:scaleY="0.4909"
+        android:translateX="29.4545"
+        android:translateY="29.4545">
+        <path
+            android:pathData="M22,28 L42,50 L22,72"
+            android:strokeWidth="10"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M42,28 L62,50 L42,72"
+            android:strokeWidth="10"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M71,50 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+    </group>
+</vector>

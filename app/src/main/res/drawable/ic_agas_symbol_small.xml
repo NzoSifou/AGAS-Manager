@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Symbole du logo 1e, variante « petite taille » de la maquette (logo horizontal) : traits plus
+  épais et couleurs plus claires pour rester lisible autour de 28 dp. Posé sur la tuile en
+  dégradé dans l'en-tête de l'application (voir AgasScreen).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:pathData="M22,28 L42,50 L22,72"
+        android:strokeWidth="11"
+        android:strokeColor="#FF796CBF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M42,28 L62,50 L42,72"
+        android:strokeWidth="11"
+        android:strokeColor="#FFB5ABFC"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:fillColor="#FFE7E5FE"
+        android:pathData="M70,50 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+</vector>

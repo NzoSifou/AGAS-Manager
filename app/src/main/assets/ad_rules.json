@@ -1,0 +1,220 @@
+{
+  "version": 7,
+
+  "_comment_activities": "Préfixes de noms de classe des Activity plein écran des régies publicitaires.",
+  "adActivityPrefixes": [
+    "com.google.android.gms.ads.",
+    "com.unity3d.ads.",
+    "com.unity3d.services.ads.",
+    "com.unity3d.mediation.",
+    "com.applovin.",
+    "com.ironsource.",
+    "com.vungle.",
+    "com.liftoff.",
+    "com.mbridge.msdk.",
+    "com.mintegral.",
+    "com.bytedance.sdk.openadsdk.",
+    "com.pangle.",
+    "com.facebook.ads.",
+    "com.inmobi.",
+    "com.chartboost.",
+    "com.fyber.",
+    "com.inneractive.",
+    "com.digitalturbine.",
+    "com.adcolony.",
+    "com.my.target.",
+    "com.yandex.mobile.ads.",
+    "io.bidmachine.",
+    "com.moloco.sdk.",
+    "com.smaato.",
+    "com.amazon.device.ads.",
+    "com.startapp.",
+    "com.tapjoy.",
+    "sg.bigo.ads.",
+    "net.pubnative.",
+    "com.verve.",
+    "com.ogury.",
+    "io.presage.",
+    "com.hyprmx.",
+    "com.mobilefuse.",
+    "com.five_corp.ad.",
+    "com.appodeal.ads.",
+    "com.yodo1.",
+    "com.tradplus.",
+    "com.anythink.",
+    "com.kwad.",
+    "com.qq.e.",
+    "com.huawei.openalliance.ad.",
+    "com.unity3d.ironsourceads.",
+    "io.adn.sdk.",
+    "com.nefta.sdk.",
+    "com.ysocorp.ysonetwork."
+  ],
+  "_comment_exclusions": "Classes qui commencent par un préfixe ci-dessus mais ne sont PAS des pubs.",
+  "adActivityExcludedPrefixes": [
+    "com.unity3d.player.",
+    "com.applovin.mediation.MaxDebugger",
+    "com.applovin.creative.MaxCreativeDebugger",
+    "com.ironsource.mediationsdk.testSuite."
+  ],
+  "_comment_landing": "Pages ouvertes DANS le jeu quand on clique sur la pub (fiche Play Store intégrée, navigateur interne). Ce ne sont pas des pubs à fermer : si elles apparaissent juste après un clic d'AGAS, c'est un détournement.",
+  "landingPageActivityPatterns": [
+    "LandingPage",
+    "InternalBrowser",
+    "StoreWebpage",
+    "InlineStore",
+    "OpenUrlActivity",
+    "WebsiteActivity"
+  ],
+
+  "_comment_traps": "Pièges connus « Activity|id » : boutons de fermeture qui ouvrent la boutique si on clique trop tôt. Ignorés pendant les 30 premières secondes de la pub.",
+  "knownEarlyTraps": [
+    "com.fyber.inneractive.sdk.activities.InneractiveFullscreenAdActivity|skip_img"
+  ],
+
+  "_comment_playable": "Identifiants (id HTML ou de vue) qui signalent un mini-jeu. Seuls les mini-jeux reçoivent l'appui de réveil : sur une vidéo, un appui ouvrirait la boutique.",
+  "playableMarkerIdPatterns": [
+    "canvas",
+    "cocos",
+    "playable",
+    "gamediv",
+    "phaser",
+    "pixi",
+    "unity-?container"
+  ],
+
+  "_comment_video": "Identifiants d'une vidéo de pub. Tant qu'une vidéo occupe l'écran, pas d'appui de réveil : un appui sur la vidéo fait surgir une popup « Installer » (et retarde le bouton Next).",
+  "videoMarkerIdPatterns": [
+    "video"
+  ],
+
+  "_comment_store_exit": "Boutons « boutique » qui sont la SEULE sortie de certains mini-jeux (AppLovin : « Google Play » à la place de « Next » ; Food Hunt : « Ouvrir la boutique »). Utilisés en dernier recours ; la popup du Play Store qui s'ouvre est ensuite refermée. Libellé entier.",
+  "storeExitTextPatterns": [
+    "google play",
+    "ouvrir la boutique",
+    "open (the )?store",
+    "visit (the )?store",
+    "go to (the )?store",
+    "voir (dans )?la boutique"
+  ],
+
+  "_comment_close": "Motifs (regex, insensibles à la casse). *Id* : cherché dans le nom d'identifiant de la vue (partie après ':id/'). *Text* : doit correspondre au texte ou à la description ENTIERS.",
+  "closeIdPatterns": [
+    "close",
+    "skip",
+    "dismiss",
+    "(^|_)x(_|$)",
+    "btn_?x",
+    "iv_?x",
+    "exit",
+    "cancel"
+  ],
+  "closeTextPatterns": [
+    "close",
+    "close (ad|advert|advertisement|video|button)",
+    "interstitial close button",
+    "dismiss( ad)?",
+    "skip",
+    "skip( this)? (ad|ads|video)",
+    "skip ?[>›»]+",
+    "next ?[>›»]*",
+    "suivant ?[>›»]*",
+    "fermer",
+    "fermer (la |cette )?(pub|publicité|annonce|vidéo)",
+    "passer",
+    "passer (la |cette )?(pub|publicité|annonce|vidéo)",
+    "ignorer",
+    "ignorer (la |cette )?(pub|publicité|annonce|vidéo)",
+    "continue to app",
+    "revenir (à|a) l'application",
+    "no,? thanks",
+    "non,? merci"
+  ],
+  "closeSymbolPatterns": [
+    "[x×✕✖╳ⓧ⨯]"
+  ],
+
+  "negativeIdPatterns": [
+    "cta",
+    "install",
+    "download",
+    "learn",
+    "privacy",
+    "adchoice",
+    "ad_choice",
+    "info",
+    "mute",
+    "sound",
+    "volume",
+    "replay",
+    "store",
+    "open",
+    "feedback",
+    "report",
+    "logo",
+    "icon_app",
+    "app_icon"
+  ],
+  "_comment_negative": "Si le texte ou la description CONTIENT un de ces motifs, on ne clique jamais dessus.",
+  "negativeTextPatterns": [
+    "install",
+    "download",
+    "télécharg",
+    "get it",
+    "learn more",
+    "en savoir plus",
+    "\\bopen\\b",
+    "ouvrir",
+    "play now",
+    "jouer",
+    "shop",
+    "acheter",
+    "\\bbuy\\b",
+    "visit",
+    "visiter",
+    "sign up",
+    "inscri",
+    "google play",
+    "app store",
+    "see more",
+    "voir plus",
+    "more info",
+    "plus d'info",
+    "ad ?choices",
+    "privacy",
+    "confidentialité",
+    "why this ad",
+    "report",
+    "signaler",
+    "feedback"
+  ],
+
+  "_comment_reward": "Protection des récompenses : tant qu'un compte à rebours de récompense est visible, on attend. Si une boîte 'vous allez perdre la récompense' apparaît, on clique sur 'Reprendre'.",
+  "rewardCountdownPatterns": [
+    "(reward|récompense|recompense).{0,25}\\b[1-9]\\d*\\b",
+    "\\b[1-9]\\d*\\s*(s|sec|secs|seconds?|secondes?)\\b.{0,20}(remaining|left|restantes?)",
+    "(skip|passer|close|fermer).{0,12}\\b(in|dans)\\s*[1-9]\\d*"
+  ],
+  "rewardWarningPatterns": [
+    "(lose|perdre|perdrez|perdras|forfeit).{0,50}(reward|récompense)",
+    "(reward|récompense).{0,50}(lost|lose|perdu)",
+    "close video\\s*\\?",
+    "skip video\\s*\\?",
+    "fermer la vidéo\\s*\\?"
+  ],
+  "rewardResumePatterns": [
+    "resume( video)?",
+    "continue( watching| video)?",
+    "keep watching",
+    "reprendre( la vidéo)?",
+    "continuer( à regarder| la vidéo)?"
+  ],
+
+  "_comment_hijack": "Paquets qui ne comptent jamais comme un détournement (en plus des lanceurs et claviers détectés automatiquement).",
+  "hijackIgnoredPackages": [
+    "android",
+    "com.android.systemui",
+    "com.android.permissioncontroller",
+    "com.google.android.permissioncontroller"
+  ]
+}

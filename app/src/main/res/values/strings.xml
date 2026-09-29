@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AGAS</string>
+    <string name="accessibility_service_label">AGAS – Passe-pub</string>
+    <string name="accessibility_service_description">AGAS détecte les publicités plein écran des jeux et appuie à ta place sur le bouton de fermeture dès qu\'il apparaît. Il ne bloque aucune publicité et ne clique jamais sur leur contenu : la pub est affichée normalement et le développeur du jeu est rémunéré. AGAS lit le contenu de l\'écran uniquement pendant qu\'une pub est affichée et n\'envoie aucune donnée.</string>
+</resources>

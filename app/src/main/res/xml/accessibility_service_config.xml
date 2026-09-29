@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  typeWindowStateChanged   : changement d'Activity / de fenêtre (détection des pubs et des détournements).
+  typeWindowsChanged       : apparition de popups dans la pub.
+  typeWindowContentChanged : INDISPENSABLE, c'est lui qui tient à jour le cache d'accessibilité côté
+                             service ; sans lui on relit indéfiniment l'écran tel qu'il était à
+                             l'ouverture de la pub (la croix apparue ensuite reste invisible).
+  typeViewClicked          : permet de distinguer les clics de l'utilisateur des nôtres.
+  canTakeScreenshot        : réservé au repli par vision (phase 2).
+
+  On s'abonne à TOUS les types (typeAllMask) : les WebView (Chromium) n'exposent le contenu des
+  pubs HTML que si les services actifs semblent en avoir besoin, ce qu'elles déduisent des types
+  d'événements demandés. Les événements inutiles sont ignorés dans onAccessibilityEvent.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeAllMask"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
+    android:canPerformGestures="true"
+    android:canRetrieveWindowContent="true"
+    android:canTakeScreenshot="true"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="50" />

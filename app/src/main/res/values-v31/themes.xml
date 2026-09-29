@@ -1,0 +1,9 @@
+<resources>
+    <!--
+      Android 12+ : l'écran de démarrage affiche l'icône adaptative (logo 1e) ; son fond reprend la
+      couleur sombre du logo au lieu du blanc par défaut.
+    -->
+    <style name="Theme.AGAS" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowSplashScreenBackground">@color/agas_background_bottom</item>
+    </style>
+</resources>

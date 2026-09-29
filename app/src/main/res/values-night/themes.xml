@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.AGAS" parent="android:Theme.Material.NoActionBar" />
+</resources>

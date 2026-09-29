@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Palette du logo 1e (maquette « AGAS app logo concepts »). -->
+    <color name="agas_background_top">#FF2D3042</color>
+    <color name="agas_background_bottom">#FF161826</color>
+    <color name="agas_chevron_dark">#FF5D5294</color>
+    <color name="agas_chevron_light">#FF9184D9</color>
+    <color name="agas_dot">#FFE7E5FE</color>
+</resources>

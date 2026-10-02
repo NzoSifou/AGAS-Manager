@@ -48,6 +48,7 @@ import com.adamglin.phosphoricons.regular.CaretRight
 import com.adamglin.phosphoricons.regular.CheckCircle
 import com.adamglin.phosphoricons.regular.Circle
 import fr.nzosifou.agas.R
+import fr.nzosifou.agas.agent.api.AdPhase
 import fr.nzosifou.agas.data.AgasEvents
 import fr.nzosifou.agas.data.AgasLog
 import fr.nzosifou.agas.data.AgasSettings
@@ -70,6 +71,8 @@ fun HomeTab(
     adStatus: AgasEvents.AdStatus?,
     log: List<AgasLog.Entry>,
     reliability: List<ReliabilityStep>,
+    notice: Pair<String, String>?,
+    onOpenNotice: () -> Unit,
     onToggleEnabled: () -> Unit,
     onOpenLog: () -> Unit,
 ) {
@@ -78,6 +81,7 @@ fun HomeTab(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         HeroCard(values, adStatus, onToggleEnabled)
+        notice?.let { (title, sub) -> NoticeCard(title, sub, onOpenNotice) }
         StatsRow(stats)
         if (reliability.any { !it.done }) ReliabilityCard(reliability)
         RecentActivity(log, onOpenLog)
@@ -97,9 +101,9 @@ private fun HeroCard(values: AgasSettings.Values, adStatus: AgasEvents.AdStatus?
     val title = when {
         !on -> "Les pubs restent à toi."
         inAd -> when (adStatus!!.phase) {
-            AgasEvents.Phase.SEARCHING -> "Recherche du bouton de fermeture…"
-            AgasEvents.Phase.CLICKING -> "Bouton trouvé, appui…"
-            AgasEvents.Phase.RETURNING -> "Retour au jeu."
+            AdPhase.SEARCHING -> "Recherche du bouton de fermeture…"
+            AdPhase.CLICKING -> "Bouton trouvé, appui…"
+            AdPhase.RETURNING -> "Retour au jeu."
         }
         else -> "Prêt à passer la prochaine pub."
     }

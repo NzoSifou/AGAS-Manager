@@ -1,4 +1,4 @@
-﻿package fr.nzosifou.agas.data
+package fr.nzosifou.agas.data
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,32 +6,32 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Réglages et statistiques, partagés entre l'interface et le service. */
+/**
+ * Réglages et statistiques, partagés entre l'interface et le service.
+ *
+ * Les réglages du Manager sont dans [Values] ; ceux de l'Agent (déclarés par lui, voir
+ * AgentSetting) sont mémorisés sous leur clé dans le même fichier, d'une version de l'Agent à l'autre.
+ */
 class AgasSettings private constructor(private val prefs: SharedPreferences) {
 
     data class Values(
         /** Interrupteur général. */
         val enabled: Boolean = true,
-        /** Mode test : détecte et journalise ce qui serait cliqué, sans cliquer. */
+        /** Mode test : l'Agent détecte et journalise ce qui serait cliqué, sans cliquer. */
         val dryRun: Boolean = false,
-        /** Autorise les boutons sans libellé (petite icône cliquable dans un coin) après un délai. */
-        val unlabeledButtons: Boolean = true,
-        /** Revient au jeu si un clic de fermeture ouvre une autre appli (Play Store, AliExpress…). */
-        val hijackGuard: Boolean = true,
-        /** Mini-jeux : un seul appui pour faire apparaître le bouton « Next » s'il ne vient pas. */
-        val wakePlayables: Boolean = true,
-        /** Mini-jeux dont la seule sortie est « Google Play » / « Ouvrir la boutique » : l'utiliser. */
-        val storeExitButtons: Boolean = true,
-        /** Tente la touche Retour si aucune croix n'est trouvée après un long moment. */
-        val backFallback: Boolean = false,
-        /** Enregistre l'arbre d'accessibilité des pubs non résolues (pour améliorer les règles). */
-        val saveDumps: Boolean = true,
+        /** Installe automatiquement les nouvelles versions de l'Agent publiées sur GitHub. */
+        val autoUpdateAgent: Boolean = true,
     )
 
     data class Stats(val adsSkipped: Int = 0, val clicks: Int = 0, val hijacksBlocked: Int = 0)
 
     private val _values = MutableStateFlow(readValues())
     val values: StateFlow<Values> = _values.asStateFlow()
+
+    private val _agentValues = MutableStateFlow(readAgentValues())
+
+    /** Réglages de l'Agent modifiés par l'utilisateur (les autres gardent leur valeur par défaut). */
+    val agentValues: StateFlow<Map<String, Boolean>> = _agentValues.asStateFlow()
 
     private val _stats = MutableStateFlow(readStats())
     val stats: StateFlow<Stats> = _stats.asStateFlow()
@@ -41,14 +41,16 @@ class AgasSettings private constructor(private val prefs: SharedPreferences) {
         prefs.edit()
             .putBoolean(K_ENABLED, v.enabled)
             .putBoolean(K_DRY_RUN, v.dryRun)
-            .putBoolean(K_UNLABELED, v.unlabeledButtons)
-            .putBoolean(K_HIJACK, v.hijackGuard)
-            .putBoolean(K_WAKE, v.wakePlayables)
-            .putBoolean(K_STORE_EXIT, v.storeExitButtons)
-            .putBoolean(K_BACK, v.backFallback)
-            .putBoolean(K_DUMPS, v.saveDumps)
+            .putBoolean(K_AUTO_UPDATE, v.autoUpdateAgent)
             .apply()
         _values.value = v
+    }
+
+    fun agentSetting(key: String, default: Boolean): Boolean = _agentValues.value[key] ?: default
+
+    fun setAgentSetting(key: String, value: Boolean) {
+        prefs.edit().putBoolean(key, value).apply()
+        _agentValues.value = _agentValues.value + (key to value)
     }
 
     fun recordAdSkipped() = updateStats { it.copy(adsSkipped = it.adsSkipped + 1) }
@@ -70,13 +72,14 @@ class AgasSettings private constructor(private val prefs: SharedPreferences) {
     private fun readValues() = Values(
         enabled = prefs.getBoolean(K_ENABLED, true),
         dryRun = prefs.getBoolean(K_DRY_RUN, false),
-        unlabeledButtons = prefs.getBoolean(K_UNLABELED, true),
-        hijackGuard = prefs.getBoolean(K_HIJACK, true),
-        wakePlayables = prefs.getBoolean(K_WAKE, true),
-        storeExitButtons = prefs.getBoolean(K_STORE_EXIT, true),
-        backFallback = prefs.getBoolean(K_BACK, false),
-        saveDumps = prefs.getBoolean(K_DUMPS, true),
+        autoUpdateAgent = prefs.getBoolean(K_AUTO_UPDATE, true),
     )
+
+    /** Tous les booléens qui ne sont pas des réglages du Manager appartiennent à l'Agent. */
+    private fun readAgentValues(): Map<String, Boolean> = prefs.all
+        .filterKeys { it !in MANAGER_KEYS }
+        .mapNotNull { (key, value) -> (value as? Boolean)?.let { key to it } }
+        .toMap()
 
     private fun readStats() = Stats(
         adsSkipped = prefs.getInt(K_ADS, 0),
@@ -87,15 +90,11 @@ class AgasSettings private constructor(private val prefs: SharedPreferences) {
     companion object {
         private const val K_ENABLED = "enabled"
         private const val K_DRY_RUN = "dry_run"
-        private const val K_UNLABELED = "unlabeled_buttons"
-        private const val K_HIJACK = "hijack_guard"
-        private const val K_WAKE = "wake_playables"
-        private const val K_STORE_EXIT = "store_exit_buttons"
-        private const val K_BACK = "back_fallback"
-        private const val K_DUMPS = "save_dumps"
+        private const val K_AUTO_UPDATE = "auto_update_agent"
         private const val K_ADS = "stat_ads"
         private const val K_CLICKS = "stat_clicks"
         private const val K_HIJACKS = "stat_hijacks"
+        private val MANAGER_KEYS = setOf(K_ENABLED, K_DRY_RUN, K_AUTO_UPDATE)
 
         @Volatile
         private var instance: AgasSettings? = null

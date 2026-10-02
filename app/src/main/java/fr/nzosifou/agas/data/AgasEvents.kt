@@ -1,5 +1,6 @@
 package fr.nzosifou.agas.data
 
+import fr.nzosifou.agas.agent.api.AdPhase
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -10,10 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 /** État en direct du service, pour l'écran d'accueil (carte principale et messages éphémères). */
 object AgasEvents {
 
-    enum class Phase { SEARCHING, CLICKING, RETURNING }
-
     /** Pub en cours de traitement : régie (« Unity », « AppLovin »…) et étape. */
-    data class AdStatus(val network: String, val phase: Phase)
+    data class AdStatus(val network: String, val phase: AdPhase)
 
     private val _adStatus = MutableStateFlow<AdStatus?>(null)
     val adStatus: StateFlow<AdStatus?> = _adStatus.asStateFlow()

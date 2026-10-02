@@ -6,6 +6,12 @@
       Distribution hors Play Store : on peut voir toutes les applis installées. Nécessaire pour
       reconnaître les Activity des jeux, trouver les lanceurs et relancer un jeu après un détournement.
     -->
+    <!--
+      Uniquement pour télécharger les nouvelles versions d'AGAS Agent depuis GitHub (et signaler
+      celles d'AGAS Manager). Rien n'est envoyé.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />

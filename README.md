@@ -1,4 +1,4 @@
-# AGAS — Android Games Ads Skipper
+# AGAS Manager — Android Games Ads Skipper
 
 AGAS passe automatiquement les publicités plein écran des jeux mobiles : il attend que le bouton
 de fermeture apparaisse et appuie dessus à ta place, y compris pour les pubs en plusieurs étapes
@@ -12,39 +12,57 @@ développeur du jeu est rémunéré. Les récompenses des pubs « récompensées
 - Distribution hors Play Store (APK) : l'appli repose sur un service d'accessibilité, usage que
   Google Play refuse pour ce type d'application.
 
+## Manager et Agent
+
+AGAS est en deux parties, sur le modèle de ReVanced Manager et de ses patches :
+
+| | Rôle | Mise à jour |
+|---|---|---|
+| **AGAS Manager** (ce dépôt) | L'appli installée : interface, réglages, journal, statistiques, service d'accessibilité, téléchargement et chargement de l'Agent | Rare : nouvel APK à installer |
+| **[AGAS Agent](https://github.com/NzoSifou/AGAS-Agent)** | Toute la logique de passage des pubs : régies reconnues, recherche des croix, anti-détournement, mini-jeux, retour au jeu | Fréquente : téléchargé et chargé par le Manager, **sans réinstaller l'appli** |
+
+Quand une nouvelle sorte de pub apparaît, il suffit de publier une nouvelle version de l'Agent :
+le Manager la trouve sur GitHub (toutes les 12 h, ou à la demande dans *Réglages → Agent*), la
+télécharge, vérifie sa signature et la charge à chaud. Pas d'écran d'installation Android ;
+l'accessibilité et les réglages du téléphone restent en place.
+
+Sécurité et robustesse :
+
+- **Signature** : le Manager ne charge un Agent que s'il est signé par la clé de publication
+  d'AGAS (l'Agent lit tout l'écran : rien d'autre n'est accepté).
+- **Contrat versionné** (`agent-api/`) : un Agent qui demande un Manager plus récent est refusé,
+  et le Manager propose de se mettre à jour.
+- **Version intégrée** : le Manager embarque une copie de l'Agent (`assets/agent/`), utilisée hors
+  ligne et en secours.
+- **Retour arrière** : un Agent qui fait planter AGAS deux fois de suite est écarté
+  automatiquement ; on peut aussi revenir à la version intégrée depuis les réglages.
+- **Internet** : uniquement pour lire les releases GitHub d'AGAS Agent et d'AGAS Manager et
+  télécharger l'Agent. Rien n'est envoyé.
+
 ## Fonctionnement
 
-AGAS est un **service d'accessibilité**. Il lit la structure de l'écran (l'« arbre
+AGAS est un **service d'accessibilité**. L'Agent lit la structure de l'écran (l'« arbre
 d'accessibilité »), pas les pixels :
 
 1. **Détection de la pub** : ouverture d'un écran appartenant à une régie publicitaire connue
    (AdMob, AppLovin, Unity, ironSource, Vungle, Mintegral, Moloco, Fyber, BidMachine, Pangle…).
 2. **Recherche du bouton de fermeture** : textes et descriptions (« Close », « Skip », « Fermer »,
-   « Next »…), identifiants (`close_button`, `skip`…), croix dessinées en SVG, petites icônes dans
-   un coin. Les boutons d'installation ou de boutique sont exclus.
-3. **Clic** dès que le bouton apparaît et devient cliquable (analyse toutes les 400 ms et à chaque
-   changement de l'écran).
+   « Next »…), identifiants, croix dessinées en SVG, petites icônes dans un coin. Les boutons
+   d'installation ou de boutique sont exclus.
+3. **Clic** dès que le bouton apparaît et devient cliquable.
 4. **Vérification** : si un clic ouvre le Play Store, AliExpress, un navigateur… (fausse croix), AGAS
    revient à la pub, évite cet endroit et mémorise le piège pour les pubs suivantes.
 
-Cas particuliers gérés :
-
-- **Récompenses** : attente des comptes à rebours (« Reward in 25 s »), et clic sur « Reprendre »
-  si une fenêtre « vous allez perdre votre récompense » apparaît.
-- **Mini-jeux (playables)** : un seul appui de « réveil » pour faire apparaître le bouton « Next »
-  (jamais un second, qui ouvrirait la boutique), et, en dernier recours, utilisation du bouton
-  « Google Play » / « Ouvrir la boutique » quand c'est la seule sortie, suivie de la fermeture de la
-  boutique.
-- **Redirections automatiques** : si la pub ouvre d'elle-même le Play Store, AGAS le referme.
-
-Les règles de détection (régies, libellés, pièges connus…) sont dans
-[`app/src/main/assets/ad_rules.json`](app/src/main/assets/ad_rules.json), séparées du code.
+Le détail (récompenses, mini-jeux, redirections) est décrit dans le dépôt
+[AGAS Agent](https://github.com/NzoSifou/AGAS-Agent).
 
 ## Installation
 
-1. Télécharger l'APK depuis la page [Releases](https://github.com/NzoSifou/AGAS/releases) et
-   l'installer. Une version installée depuis Android Studio (signature de debug) doit d'abord
-   être désinstallée : Android refuse d'installer une appli signée par une autre clé par-dessus.
+1. Télécharger **AGAS Manager** depuis la page
+   [Releases](https://github.com/NzoSifou/AGAS-Manager/releases) et l'installer. L'Agent n'est
+   pas à installer : il est intégré, puis mis à jour par le Manager. Une version installée depuis
+   Android Studio (signature de debug) doit d'abord être désinstallée : Android refuse
+   d'installer une appli signée par une autre clé par-dessus.
 2. Ouvrir AGAS, puis **« Ouvrir l'accessibilité »** et activer **« AGAS – Passe-pub »**.
    - Option grisée ? Android bloque l'accessibilité des applis installées hors Play Store :
      *Infos de l'appli* → menu ⋮ → **« Autoriser les paramètres restreints »**, puis réessayer.
@@ -60,26 +78,40 @@ Les règles de détection (régies, libellés, pièges connus…) sont dans
 
 | Réglage | Par défaut | Rôle |
 |---|---|---|
-| Passer les pubs automatiquement | activé | Interrupteur général |
-| Mode test | désactivé | Détecte et journalise ce qui serait cliqué, sans cliquer |
-| Anti-détournement | activé | Revient à la pub si un clic ou la pub ouvre une autre appli, et mémorise les fausses croix |
-| Boutons sans libellé | activé | Après 8 s, essaie les petites icônes dans un coin |
-| Réveiller les mini-jeux | activé | Un seul appui pour faire apparaître « Next » sur un mini-jeu |
-| Sortir par le bouton boutique | activé | Utilise « Google Play » / « Ouvrir la boutique » quand c'est la seule sortie (compte comme un clic sur la pub) |
-| Touche Retour en dernier recours | désactivé | Après 45 s sans bouton trouvé (peut faire perdre une récompense) |
-| Enregistrer les pubs non résolues | activé | Sauvegarde la structure et une capture des pubs non résolues |
+| Passer les pubs automatiquement | activé | Interrupteur général (arrête l'Agent) |
+| Mode test | désactivé | L'Agent détecte et journalise ce qui serait cliqué, sans cliquer |
+| Mettre à jour l'Agent automatiquement | activé | Installe les nouvelles versions de l'Agent dès leur publication |
+
+Les autres réglages (anti-détournement, mini-jeux, bouton boutique…) sont **déclarés par l'Agent**
+et affichés tels quels : une nouvelle version de l'Agent peut en ajouter sans mise à jour du
+Manager. Leur valeur est conservée d'une version de l'Agent à l'autre.
 
 ## Développement
 
+Les deux dépôts se clonent côte à côte : l'Agent compile contre le contrat (`agent-api/`) de ce
+dépôt.
+
+```bash
+git clone https://github.com/NzoSifou/AGAS-Manager.git
+git clone https://github.com/NzoSifou/AGAS-Agent.git
+```
+
 ```bash
 ./gradlew assembleDebug        # APK : app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest    # tests unitaires (règles, anti-détournement, croix SVG)
+./gradlew testDebugUnitTest    # tests unitaires (versions, releases GitHub)
 ./gradlew assembleRelease      # APK signé : app/build/outputs/apk/release/app-release.apk
 ```
 
 La release est signée avec la clé décrite dans `keystore.properties` à la racine du projet
 (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). Ce fichier et la clé ne sont jamais
-commités ; sans eux, `assembleRelease` produit un APK non signé.
+commités ; sans eux, `assembleRelease` produit un APK non signé. L'Agent est signé avec la même clé.
+
+**Version intégrée de l'Agent** : avant une release du Manager, copier l'APK de release de l'Agent
+dans `app/src/main/assets/agent/agas-agent.apk`.
+
+**Contrat Manager ↔ Agent** (`agent-api/`) : ne jamais modifier ni supprimer un élément existant
+d'`Agent`, `AgentHost` ou `AgentSetting` ; en ajouter, et augmenter `AgentApi.VERSION`. Un Agent
+compilé contre la version N ne se charge que dans un Manager qui implémente N ou plus.
 
 Diagnostic sur appareil :
 
@@ -90,48 +122,36 @@ Diagnostic sur appareil :
 - **Enregistrement à la demande** (version debug uniquement) :
   `adb shell am broadcast -a fr.nzosifou.agas.DUMP -p fr.nzosifou.agas`.
   Ne pas utiliser `uiautomator dump` : il suspend les services d'accessibilité.
+- **Essayer un Agent de développement** (version debug uniquement) : copier l'APK debug de l'Agent
+  dans `Android/data/fr.nzosifou.agas/files/agent-dev.apk`, puis
+  `adb shell am broadcast -a fr.nzosifou.agas.LOAD_AGENT -p fr.nzosifou.agas`.
 
 Structure du code (`app/src/main/java/fr/nzosifou/agas/`) :
 
 | Dossier | Contenu |
 |---|---|
-| `service/` | `AdSkipperService` : suivi des pubs, boucle d'analyse, clics, retour au jeu |
-| `detection/` | `CloseButtonFinder` (analyse de l'écran), `SvgIcons` (croix SVG), `TreeDumper` |
-| `guard/` | `HijackGuard` : détection des détournements après un clic |
-| `rules/` | Chargement de `ad_rules.json` |
-| `data/` | Réglages, statistiques, journal, mémoire des pièges |
-| `ui/` | Interface Jetpack Compose : `AgasApp` (onglets), `SetupScreen`, `HomeTab`, `SettingsTab`, `LogTab`, composants et thème Nocturne |
+| `service/` | `AdSkipperService` : service d'accessibilité, au premier plan, qui transmet tout à l'Agent |
+| `runtime/` | `AgentRuntime` (chargement, démarrage, remplacement à chaud, protection contre les plantages), `AgentStore` (versions disponibles, signature), `AgentUpdater` (releases GitHub) |
+| `data/` | Réglages, statistiques, journal, état en direct |
+| `ui/` | Interface Jetpack Compose : `AgasApp` (onglets), `SetupScreen`, `HomeTab`, `SettingsTab`, `AgentSection`, `LogTab`, composants et thème Nocturne |
+| `../agent-api/` | Contrat entre le Manager et l'Agent |
 
 ## Changelog
 
-### [1.0.0] — 2026-09-29
+### [1.0.0] — non publiée
 
-Première version.
+Première version, en deux parties : AGAS Manager et
+[AGAS Agent](https://github.com/NzoSifou/AGAS-Agent) (voir son changelog pour le passage des pubs).
 
-**Détection et fermeture**
+**Manager et Agent**
 
-- Service d'accessibilité qui détecte les pubs plein écran d'une quarantaine de régies publicitaires.
-- Recherche du bouton de fermeture par texte, description, identifiant, croix SVG et icônes sans
-  libellé ; boutons d'installation et de boutique exclus.
-- Pubs en plusieurs étapes (vidéo → « Skip » → écran de fin) et popups dans la pub.
-- Contenu des pubs HTML (WebView) lu en direct : cache d'accessibilité désactivé, abonnement à tous
-  les événements pour que Chromium expose la page.
-- Clic d'accessibilité ou appui simulé selon le cas ; jamais d'appui simulé sur un bouton pas encore
-  cliquable (il traverserait jusqu'à la pub).
-
-**Protection**
-
-- Anti-détournement : retour à la pub si un clic ou la pub elle-même ouvre le Play Store, un
-  navigateur ou une autre appli, y compris à travers des redirections en chaîne.
-- Mémoire des pièges : un bouton qui a ouvert la boutique est évité pour ce type de pub.
-- Protection des récompenses (comptes à rebours, fenêtre « récompense perdue »).
-
-**Mini-jeux**
-
-- Appui de réveil unique pour faire apparaître « Next » (pas pendant une vidéo ni un compte à
-  rebours).
-- Bouton de sortie « Google Play » / « Ouvrir la boutique » en dernier recours, puis fermeture de la
-  popup du Play Store.
+- Logique de passage des pubs déplacée dans AGAS Agent, chargé à la volée par le Manager.
+- Mise à jour de l'Agent depuis les releases GitHub, sans réinstaller l'appli : automatique
+  (toutes les 12 h) ou à la demande, avec vérification de la signature et du contrat.
+- Version de l'Agent intégrée au Manager pour fonctionner hors ligne ; retour automatique à la
+  version précédente si un Agent fait planter AGAS, ou à la demande.
+- Réglages déclarés par l'Agent, affichés et mémorisés par le Manager.
+- Signalement des nouvelles versions d'AGAS Manager.
 
 **Fiabilité**
 
@@ -142,8 +162,8 @@ Première version.
 
 - Interface Jetpack Compose au design system sombre « Nocturne » (icônes Phosphor), en trois
   onglets : **Accueil** (état en direct de la pub en cours, statistiques, carte « Fiabilité » à
-  cocher, activité récente), **Réglages** (regroupés par usage) et **Journal** (filtres Tout /
-  Actions / Alertes, partage).
+  cocher, mises à jour, activité récente), **Réglages** (regroupés par usage, section Agent) et
+  **Journal** (filtres Tout / Actions / Alertes, partage).
 - Écran de première configuration tant que le service d'accessibilité n'est pas activé.
 - Messages éphémères quand une pub est passée ou qu'une fausse croix est évitée.
 - Logo « Avance rapide auto » : icône adaptative (fond et premier plan séparés), icône monochrome

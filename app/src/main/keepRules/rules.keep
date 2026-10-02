@@ -1,12 +1,8 @@
-# Add project specific R8 rules here.
-# AGP will combine all keep rule files in src/main/keepRules to pass to R8
-#
-# For more details, see
-#   https://d.android.com/r/tools/r8/keep-rules
+# AGAS Agent est chargé à la volée et compilé contre ces classes, par leur nom : si R8 est activé
+# un jour, elles doivent rester intactes.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Contrat Manager ↔ Agent.
+-keep class fr.nzosifou.agas.agent.api.** { *; }
+
+# Bibliothèque Kotlin : l'Agent ne l'embarque pas, il utilise celle du Manager.
+-keep class kotlin.** { *; }

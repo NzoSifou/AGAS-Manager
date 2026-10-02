@@ -27,7 +27,6 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -43,6 +42,8 @@ android {
 
     buildTypes {
         release {
+            // R8 désactivé : il retirerait ou renommerait des classes de Kotlin et du contrat dont
+            // l'Agent, chargé à la volée, a besoin (voir keepRules/rules.keep avant de l'activer).
             optimization {
                 enable = false
             }
@@ -56,13 +57,10 @@ android {
     buildFeatures {
         compose = true
     }
-    testOptions {
-        // Les classes Android (ex. Point) renvoient des valeurs par défaut dans les tests JVM.
-        unitTests.isReturnDefaultValues = true
-    }
 }
 
 dependencies {
+    implementation(project(":agent-api"))
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -74,6 +72,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.json)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
 }

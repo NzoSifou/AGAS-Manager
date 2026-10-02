@@ -22,6 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AGAS"
+rootProject.name = "AGAS-Manager"
 include(":app")
+include(":agent-api")
  

@@ -57,6 +57,8 @@ import com.adamglin.phosphoricons.regular.SlidersHorizontal
 import fr.nzosifou.agas.data.AgasEvents
 import fr.nzosifou.agas.data.AgasLog
 import fr.nzosifou.agas.data.AgasSettings
+import fr.nzosifou.agas.runtime.AgentRuntime
+import fr.nzosifou.agas.runtime.AgentUpdater
 import fr.nzosifou.agas.service.AdSkipperService
 import fr.nzosifou.agas.ui.components.AgasLogoTile
 import fr.nzosifou.agas.ui.components.NDivider
@@ -97,6 +99,10 @@ private fun MainApp() {
     val stats by settings.stats.collectAsStateWithLifecycle()
     val log by AgasLog.entries.collectAsStateWithLifecycle()
     val adStatus by AgasEvents.adStatus.collectAsStateWithLifecycle()
+    val agentValues by settings.agentValues.collectAsStateWithLifecycle()
+    val runtime by AgentRuntime.state.collectAsStateWithLifecycle()
+    val update by AgentUpdater.status.collectAsStateWithLifecycle()
+    val managerRelease by AgentUpdater.managerRelease.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableStateOf(Tab.HOME) }
 
     // Message éphémère (« Pub Unity passée »…), 2,4 s.
@@ -110,6 +116,9 @@ private fun MainApp() {
     }
 
     val reliability = rememberReliabilitySteps(context)
+
+    // Nouvelle version de l'Agent ou du Manager ? (au plus une fois toutes les 12 h)
+    LaunchedEffect(Unit) { AgentUpdater.checkIfDue(context, install = values.autoUpdateAgent) }
 
     Column(
         Modifier
@@ -142,10 +151,20 @@ private fun MainApp() {
                         adStatus = adStatus,
                         log = log,
                         reliability = reliability,
+                        notice = homeNotice(runtime, update, managerRelease),
+                        onOpenNotice = { tab = Tab.SETTINGS },
                         onToggleEnabled = { settings.update { it.copy(enabled = !it.enabled) } },
                         onOpenLog = { tab = Tab.LOG },
                     )
-                    Tab.SETTINGS -> SettingsTab(values, onChange = settings::update, onResetStats = settings::resetStats)
+                    Tab.SETTINGS -> SettingsTab(
+                        values = values,
+                        onChange = settings::update,
+                        agentSettings = runtime.settings,
+                        agentValues = agentValues,
+                        onAgentChange = settings::setAgentSetting,
+                        agentSection = { AgentSection(runtime, update, managerRelease, values, settings::update) },
+                        onResetStats = settings::resetStats,
+                    )
                     Tab.LOG -> LogTab(log, onShare = { shareLog(context) }, onClear = AgasLog::clear)
                 }
             }

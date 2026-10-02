@@ -63,6 +63,12 @@ object AgentRuntime {
     private var scope: CoroutineScope? = null
     private var lastErrorLogAt = 0L
 
+    /**
+     * Derniers changements de fenêtre (ouverture d'une Activity…), rejoués à un Agent qui démarre :
+     * remplacé à chaud pendant une pub, il doit savoir qu'elle est à l'écran.
+     */
+    private val recentWindowEvents = ArrayDeque<AccessibilityEvent>()
+
     /** Charge le meilleur Agent disponible, sans le démarrer (appelé par l'activité et le service). */
     fun init(context: Context) {
         if (::store.isInitialized) return
@@ -95,6 +101,10 @@ object AgentRuntime {
     }
 
     fun onAccessibilityEvent(event: AccessibilityEvent) {
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            recentWindowEvents.addLast(AccessibilityEvent(event))
+            while (recentWindowEvents.size > MAX_RECENT_WINDOW_EVENTS) recentWindowEvents.removeFirst()
+        }
         if (started) guarded("événement") { agent?.onAccessibilityEvent(event) }
     }
 
@@ -161,10 +171,19 @@ object AgentRuntime {
         if (shouldRun && !started) {
             started = true
             guarded("démarrage") { agent?.start(Host) }
+            replayWindowEvents()
         } else if (!shouldRun && started) {
             stopAgent()
         }
         publish()
+    }
+
+    /** Rejoue au nouvel Agent les changements de fenêtre encore d'actualité (fenêtre toujours affichée). */
+    private fun replayWindowEvents() {
+        val onScreen = runCatching { service?.windows?.map { it.id }?.toSet() }.getOrNull().orEmpty()
+        recentWindowEvents.filter { it.windowId in onScreen }.forEach { event ->
+            guarded("événement") { agent?.onAccessibilityEvent(event) }
+        }
     }
 
     private fun stopAgent() {
@@ -264,4 +283,5 @@ object AgentRuntime {
     private const val AGENT_CODE_PREFIX = "fr.nzosifou.agas.agent."
     private const val API_PREFIX = "fr.nzosifou.agas.agent.api."
     private const val ERROR_LOG_INTERVAL_MS = 10_000L
+    private const val MAX_RECENT_WINDOW_EVENTS = 8
 }

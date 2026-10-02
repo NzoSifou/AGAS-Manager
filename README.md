@@ -105,6 +105,8 @@ git clone https://github.com/NzoSifou/AGAS-Agent.git
 La release est signée avec la clé décrite dans `keystore.properties` à la racine du projet
 (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). Ce fichier et la clé ne sont jamais
 commités ; sans eux, `assembleRelease` produit un APK non signé. L'Agent est signé avec la même clé.
+Quand ce fichier est présent, les builds de debug sont aussi signés avec cette clé : un Manager de
+debug s'installe alors par-dessus la version publiée (accessibilité et réglages conservés).
 
 **Version intégrée de l'Agent** : avant une release du Manager, copier l'APK de release de l'Agent
 dans `app/src/main/assets/agent/agas-agent.apk`.

@@ -41,6 +41,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Même clé que la release quand elle est disponible : le Manager de debug s'installe
+            // par-dessus la version publiée (accessibilité conservée) et charge les Agents de debug.
+            if (releaseSigning != null) signingConfig = signingConfigs.getByName("release")
+        }
         release {
             // R8 désactivé : il retirerait ou renommerait des classes de Kotlin et du contrat dont
             // l'Agent, chargé à la volée, a besoin (voir keepRules/rules.keep avant de l'activer).

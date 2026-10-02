@@ -140,7 +140,7 @@ Structure du code (`app/src/main/java/fr/nzosifou/agas/`) :
 
 ## Changelog
 
-### [1.0.0] — non publiée
+### [1.0.0] — 2026-10-02
 
 Première version, en deux parties : AGAS Manager et
 [AGAS Agent](https://github.com/NzoSifou/AGAS-Agent) (voir son changelog pour le passage des pubs).
